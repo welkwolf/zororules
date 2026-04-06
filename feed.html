@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Соцсеть — Посты с фото и видео</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #554FD8;
+            --primary-light: #8F88FF;
+            --secondary: #FF6B8B;
+            --accent: #4ECDC4;
+            --success: #4CAF50;
+            --error: #F44336;
+            --warning: #FFC107;
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #121212;
+            --bg-tertiary: #1E1E1E;
+            --surface: #252525;
+            --surface2: #25252594;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --text-tertiary: #757575;
+            --border: rgba(255, 255, 255, 0.1);
+            --hover: rgba(255, 255, 255, 0.05);
+            --header-height: 60px;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: "Google Sans", sans-serif;
+            overflow-x: hidden;
+        }
+
+        .app {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            min-height: 100vh;
+        }
+
+        /* header */
+        .main-header {
+            background: var(--bg-secondary);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .icon-btn {
+            background: var(--surface);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: 0.2s;
+        }
+        .icon-btn:active { transform: scale(0.95); background: var(--primary-dark); }
+
+        /* create post card */
+        .create-post-card {
+            background: var(--bg-secondary);
+            margin: 16px;
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .post-input-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .avatar-sm {
+            width: 48px;
+            height: 48px;
+            border-radius: 25%;
+            object-fit: cover;
+            background: var(--surface);
+        }
+        .post-textarea {
+            flex: 1;
+            background: var(--surface);
+            border: none;
+            border-radius: 24px;
+            padding: 14px 16px;
+            color: var(--text-primary);
+            font-size: 16px;
+            resize: none;
+            font-family: inherit;
+        }
+        .post-textarea:focus { outline: none; border: 1px solid var(--primary); background: var(--bg-tertiary); }
+        .media-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .preview-media {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+        .preview-media img, .preview-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .remove-media {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+        }
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .media-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .media-btn {
+            background: var(--surface);
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .publish-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 30px;
+            padding: 8px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* post feed */
+        .posts-feed {
+            padding: 0 16px 80px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .post-card {
+            background: var(--bg-secondary);
+            border-radius: 28px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: 0.2s;
+        }
+        .post-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .post-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 25%;
+            object-fit: cover;
+        }
+        .post-user-info {
+            flex: 1;
+        }
+        .post-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .post-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        .post-text {
+            padding: 0 16px 12px 16px;
+            font-size: 15px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+        .post-media {
+            width: 100%;
+            max-height: 500px;
+            background: var(--bg-tertiary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .post-media img, .post-media video {
+            max-width: 100%;
+            max-height: 480px;
+            object-fit: contain;
+        }
+        .post-stats {
+            padding: 12px 16px;
+            display: flex;
+            gap: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+        .like-btn, .comment-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .like-btn.liked { color: var(--secondary); }
+        .delete-post {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--error);
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .comments-section {
+            padding: 0 16px 16px 16px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            display: none;
+        }
+        .comments-section.show { display: block; }
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 25%;
+        }
+        .comment-content {
+            flex: 1;
+            background: var(--surface);
+            padding: 8px 12px;
+            border-radius: 18px;
+        }
+        .comment-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .comment-text {
+            margin-top: 2px;
+        }
+        .comment-input-wrapper {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            align-items: center;
+        }
+        .comment-field {
+            flex: 1;
+            background: var(--surface);
+            border: none;
+            border-radius: 24px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+        }
+        .send-comment {
+            background: var(--primary-dark);
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+        }
+        .empty-feed {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-tertiary);
+        }
+        /* modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 32px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        .modal-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .profile-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-avatar-lg {
+            width: 96px;
+            height: 96px;
+            border-radius: 30%;
+            object-fit: cover;
+            margin-bottom: 12px;
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: white;
+            z-index: 1100;
+            animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        button { background: none; border: none; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="main-header">
+        <div class="logo">✨ Соцсеть</div>
+        <div class="header-actions">
+            <button class="icon-btn" id="profileBtn">👤</button>
+        </div>
+    </div>
+
+    <!-- create post -->
+    <div class="create-post-card">
+        <div class="post-input-area">
+            <img src="https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png" alt="avatar" class="avatar-sm" id="currentUserAvatar">
+            <textarea class="post-textarea" id="postContent" placeholder="Что нового? Поделитесь мыслями..."></textarea>
+        </div>
+        <div class="media-preview" id="mediaPreview"></div>
+        <div class="post-actions">
+            <div class="media-buttons">
+                <button class="media-btn" id="uploadImageBtn">📷 Фото</button>
+                <button class="media-btn" id="uploadVideoBtn">🎥 Видео</button>
+            </div>
+            <button class="publish-btn" id="publishPostBtn">Опубликовать</button>
+        </div>
+        <input type="file" id="imageFileInput" accept="image/*" style="display:none">
+        <input type="file" id="videoFileInput" accept="video/*" style="display:none">
+    </div>
+
+    <!-- feed -->
+    <div id="postsFeed" class="posts-feed">
+        <div class="loading-spinner"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<!-- profile modal -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <div class="profile-info">
+            <img src="" id="modalAvatar" class="profile-avatar-lg">
+            <h3 id="modalName">Загрузка...</h3>
+            <p id="modalEmail" class="text-secondary"></p>
+        </div>
+        <button class="modal-btn" id="editProfileBtn">✏️ Редактировать профиль</button>
+        <button class="modal-btn" id="logoutAppBtn">🚪 Выйти</button>
+        <button class="modal-btn" id="closeProfileModalBtn">Закрыть</button>
+    </div>
+</div>
+
+<!-- edit profile modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <h2 class="modal-title">Редактировать</h2>
+        <div class="profile-info">
+            <img src="" id="editAvatarImg" class="profile-avatar-lg" style="cursor:pointer;">
+            <input type="file" id="editAvatarInput" accept="image/*" style="display:none">
+        </div>
+        <input type="text" id="editNickname" class="modal-input" placeholder="Никнейм">
+        <button class="modal-btn" id="saveProfileEditBtn">Сохранить</button>
+        <button class="modal-btn" id="cancelEditBtn">Отмена</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+<script>
+    // ---------- Appwrite Configuration ----------
+    const APPWRITE_ENDPOINT = 'https://sfo.cloud.appwrite.io/v1'; 
+    const APPWRITE_PROJECT_ID = 'zuia'; 
+    const APPWRITE_DATABASE_ID = '699226180003eb25c263';
+    const APPWRITE_POSTS_COLLECTION = 'posts';
+    const APPWRITE_COMMENTS_COLLECTION = 'comments';
+    const APPWRITE_BUCKET_ID = 'media_bucket';
+    const CLOUDINARY_UPLOAD_PRESET = 'viagal';
+    const CLOUDINARY_CLOUD_NAME = 'dbjexsgbh';   
+
+    // Инициализация Appwrite
+    const client = new Appwrite.Client();
+    client.setEndpoint(APPWRITE_ENDPOINT).setProject(APPWRITE_PROJECT_ID);
+    const account = new Appwrite.Account(client);
+    const databases = new Appwrite.Databases(client);
+    const storage = new Appwrite.Storage(client);
+
+    let currentUser = null;
+    let allPosts = [];
+
+    // DOM elements
+    const postsFeed = document.getElementById('postsFeed');
+    const postContent = document.getElementById('postContent');
+    const publishBtn = document.getElementById('publishPostBtn');
+    const imageInput = document.getElementById('imageFileInput');
+    const videoInput = document.getElementById('videoFileInput');
+    const mediaPreviewDiv = document.getElementById('mediaPreview');
+    let selectedFile = null;
+    let selectedFileType = null; // 'image' or 'video'
+
+    // helper: show toast
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // upload to Cloudinary
+    async function uploadToCloudinary(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+        try {
+            const res = await fetch(url, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.secure_url) return data.secure_url;
+            else throw new Error('Cloudinary upload failed');
+        } catch (err) { console.error(err); showToast('Ошибка загрузки медиа'); return null; }
+    }
+
+    // --- Auth & User ---
+    async function checkAuth() {
+        try {
+            currentUser = await account.get();
+            document.getElementById('currentUserAvatar').src = currentUser.prefs?.avatar || 'https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png';
+            document.getElementById('modalName').innerText = currentUser.name || currentUser.email;
+            document.getElementById('modalEmail').innerText = currentUser.email;
+            document.getElementById('modalAvatar').src = currentUser.prefs?.avatar || 'https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png';
+            await loadPosts();
+        } catch (err) {
+            console.log('Not authenticated');
+            showAuthModal();
+        }
+    }
+
+    async function loginWithEmail(email, password) {
+        try {
+            await account.createEmailSession(email, password);
+            await checkAuth();
+            hideModal('profileModal');
+            showToast('Добро пожаловать!');
+        } catch (err) { showToast('Ошибка входа: ' + err.message); }
+    }
+
+    async function registerWithEmail(email, password, name) {
+        try {
+            await account.create('unique()', email, password, name);
+            await account.createEmailSession(email, password);
+            await checkAuth();
+            hideModal('profileModal');
+            showToast('Регистрация успешна!');
+        } catch (err) { showToast('Ошибка: ' + err.message); }
+    }
+
+    async function logout() {
+        await account.deleteSession('current');
+        currentUser = null;
+        showAuthModal();
+    }
+
+    // update user profile (nickname & avatar)
+    async function updateUserProfile(nickname, avatarUrl) {
+        try {
+            let prefs = currentUser.prefs || {};
+            if (avatarUrl) prefs.avatar = avatarUrl;
+            await account.updateName(nickname);
+            await account.updatePrefs(prefs);
+            currentUser = await account.get();
+            document.getElementById('currentUserAvatar').src = currentUser.prefs?.avatar || 'https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png';
+            showToast('Профиль обновлён');
+        } catch (err) { showToast('Ошибка: ' + err.message); }
+    }
+
+    // --- Posts CRUD ---
+    async function loadPosts() {
+        if (!currentUser) return;
+        try {
+            const response = await databases.listDocuments(APPWRITE_DATABASE_ID, APPWRITE_POSTS_COLLECTION, [
+                Appwrite.Query.orderDesc('$createdAt'),
+                Appwrite.Query.limit(100)
+            ]);
+            allPosts = response.documents;
+            renderPosts();
+        } catch (err) {
+            console.error(err);
+            postsFeed.innerHTML = '<div class="empty-feed">❌ Ошибка загрузки постов</div>';
+        }
+    }
+
+    async function createPost(content, mediaUrl, mediaType) {
+        try {
+            await databases.createDocument(APPWRITE_DATABASE_ID, APPWRITE_POSTS_COLLECTION, 'unique()', {
+                userId: currentUser.$id,
+                userName: currentUser.name || currentUser.email,
+                userAvatar: currentUser.prefs?.avatar || '',
+                content: content,
+                mediaUrl: mediaUrl || null,
+                mediaType: mediaType || null,
+                likes: [],
+                createdAt: new Date().toISOString()
+            });
+            await loadPosts();
+            postContent.value = '';
+            clearMediaPreview();
+            showToast('Пост опубликован!');
+        } catch (err) { showToast('Ошибка: ' + err.message); }
+    }
+
+    async function deletePost(postId) {
+        if (!confirm('Удалить пост?')) return;
+        try {
+            await databases.deleteDocument(APPWRITE_DATABASE_ID, APPWRITE_POSTS_COLLECTION, postId);
+            await loadPosts();
+            showToast('Пост удалён');
+        } catch (err) { showToast('Ошибка'); }
+    }
+
+    async function toggleLike(postId, currentLikesArray) {
+        if (!currentUser) return;
+        let likes = currentLikesArray || [];
+        const userId = currentUser.$id;
+        if (likes.includes(userId)) {
+            likes = likes.filter(id => id !== userId);
+        } else {
+            likes.push(userId);
+        }
+        try {
+            await databases.updateDocument(APPWRITE_DATABASE_ID, APPWRITE_POSTS_COLLECTION, postId, { likes: likes });
+            await loadPosts();
+        } catch (err) { console.error(err); }
+    }
+
+    // Comments functions
+    async function loadComments(postId, containerId) {
+        try {
+            const comments = await databases.listDocuments(APPWRITE_DATABASE_ID, APPWRITE_COMMENTS_COLLECTION, [
+                Appwrite.Query.equal('postId', postId),
+                Appwrite.Query.orderAsc('$createdAt')
+            ]);
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            for (let comment of comments.documents) {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'comment-item';
+                commentDiv.innerHTML = `
+                    <img src="${comment.userAvatar || 'https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png'}" class="comment-avatar">
+                    <div class="comment-content">
+                        <div class="comment-name">${escapeHtml(comment.userName)}</div>
+                        <div class="comment-text">${escapeHtml(comment.text)}</div>
+                    </div>
+                `;
+                container.appendChild(commentDiv);
+            }
+            // add comment input
+            const inputWrapper = document.createElement('div');
+            inputWrapper.className = 'comment-input-wrapper';
+            inputWrapper.innerHTML = `
+                <input type="text" class="comment-field" id="commentField_${postId}" placeholder="Написать комментарий...">
+                <button class="send-comment" data-post="${postId}">➤</button>
+            `;
+            container.appendChild(inputWrapper);
+            const sendBtn = inputWrapper.querySelector('button');
+            sendBtn.onclick = () => addComment(postId, document.getElementById(`commentField_${postId}`).value);
+        } catch (err) { console.error(err); }
+    }
+
+    async function addComment(postId, text) {
+        if (!text.trim() || !currentUser) return;
+        try {
+            await databases.createDocument(APPWRITE_DATABASE_ID, APPWRITE_COMMENTS_COLLECTION, 'unique()', {
+                postId: postId,
+                userId: currentUser.$id,
+                userName: currentUser.name || currentUser.email,
+                userAvatar: currentUser.prefs?.avatar || '',
+                text: text,
+                createdAt: new Date().toISOString()
+            });
+            // reload comments for this post
+            const containerId = `comments-${postId}`;
+            loadComments(postId, containerId);
+            const inputField = document.getElementById(`commentField_${postId}`);
+            if (inputField) inputField.value = '';
+        } catch (err) { showToast('Ошибка комментария'); }
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    // render posts
+    function renderPosts() {
+        if (!allPosts.length) {
+            postsFeed.innerHTML = '<div class="empty-feed">📭 Нет постов. Напишите первый!</div>';
+            return;
+        }
+        postsFeed.innerHTML = '';
+        for (let post of allPosts) {
+            const postCard = document.createElement('div');
+            postCard.className = 'post-card';
+            const isLiked = currentUser && post.likes && post.likes.includes(currentUser.$id);
+            const likeClass = isLiked ? 'liked' : '';
+            const mediaHtml = post.mediaUrl ? 
+                (post.mediaType === 'video' ? `<video controls src="${post.mediaUrl}"></video>` : `<img src="${post.mediaUrl}" alt="media" loading="lazy">`) : '';
+            postCard.innerHTML = `
+                <div class="post-header">
+                    <img src="${post.userAvatar || 'https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png'}" class="post-avatar">
+                    <div class="post-user-info">
+                        <div class="post-name">${escapeHtml(post.userName)}</div>
+                        <div class="post-time">${new Date(post.$createdAt).toLocaleString()}</div>
+                    </div>
+                    ${currentUser && post.userId === currentUser.$id ? `<button class="delete-post" data-id="${post.$id}">🗑️</button>` : ''}
+                </div>
+                <div class="post-text">${escapeHtml(post.content)}</div>
+                <div class="post-media">${mediaHtml}</div>
+                <div class="post-stats">
+                    <button class="like-btn ${likeClass}" data-id="${post.$id}">❤️ ${post.likes ? post.likes.length : 0}</button>
+                    <button class="comment-btn" data-id="${post.$id}">💬 Комментарии</button>
+                </div>
+                <div class="comments-section" id="comments-${post.$id}"></div>
+            `;
+            postsFeed.appendChild(postCard);
+            // attach like
+            const likeBtn = postCard.querySelector('.like-btn');
+            likeBtn.onclick = () => toggleLike(post.$id, post.likes || []);
+            // delete
+            const delBtn = postCard.querySelector('.delete-post');
+            if (delBtn) delBtn.onclick = () => deletePost(post.$id);
+            // comments toggle
+            const commentBtn = postCard.querySelector('.comment-btn');
+            const commentsDiv = postCard.querySelector(`.comments-section`);
+            commentBtn.onclick = async () => {
+                const isOpen = commentsDiv.classList.contains('show');
+                if (!isOpen) {
+                    commentsDiv.classList.add('show');
+                    await loadComments(post.$id, `comments-${post.$id}`);
+                } else {
+                    commentsDiv.classList.remove('show');
+                }
+            };
+        }
+    }
+
+    // Media preview logic
+    function clearMediaPreview() { mediaPreviewDiv.innerHTML = ''; selectedFile = null; selectedFileType = null; }
+    function previewFile(file, type) {
+        clearMediaPreview();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = 'preview-media';
+            if (type === 'image') {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                div.appendChild(img);
+            } else {
+                const video = document.createElement('video');
+                video.src = e.target.result;
+                video.controls = true;
+                video.style.width = '100%';
+                div.appendChild(video);
+            }
+            const removeSpan = document.createElement('div');
+            removeSpan.className = 'remove-media';
+            removeSpan.innerHTML = '✕';
+            removeSpan.onclick = () => clearMediaPreview();
+            div.appendChild(removeSpan);
+            mediaPreviewDiv.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+        selectedFile = file;
+        selectedFileType = type;
+    }
+
+    imageInput.onchange = (e) => { if(e.target.files[0]) previewFile(e.target.files[0], 'image'); };
+    videoInput.onchange = (e) => { if(e.target.files[0]) previewFile(e.target.files[0], 'video'); };
+    document.getElementById('uploadImageBtn').onclick = () => imageInput.click();
+    document.getElementById('uploadVideoBtn').onclick = () => videoInput.click();
+
+    publishBtn.onclick = async () => {
+        const content = postContent.value.trim();
+        if (!content && !selectedFile) { showToast('Напишите текст или добавьте медиа'); return; }
+        let mediaUrl = null, mediaType = null;
+        if (selectedFile) {
+            publishBtn.disabled = true;
+            publishBtn.innerText = 'Загрузка...';
+            mediaUrl = await uploadToCloudinary(selectedFile);
+            mediaType = selectedFileType;
+            publishBtn.disabled = false;
+            publishBtn.innerText = 'Опубликовать';
+            if (!mediaUrl) { showToast('Не удалось загрузить медиа'); return; }
+        }
+        await createPost(content, mediaUrl, mediaType);
+        clearMediaPreview();
+    };
+
+    function showAuthModal() {
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal active';
+        modalDiv.id = 'tempAuthModal';
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h2 class="modal-title">Вход / Регистрация</h2>
+                <input type="email" id="authEmail" class="modal-input" placeholder="Email">
+                <input type="password" id="authPassword" class="modal-input" placeholder="Пароль">
+                <input type="text" id="authName" class="modal-input" placeholder="Имя (при регистрации)" style="display:none">
+                <div class="flex" style="display: flex; gap:8px; margin-bottom:12px;">
+                    <button id="loginTabBtn" class="modal-btn" style="background: var(--primary);">Вход</button>
+                    <button id="registerTabBtn" class="modal-btn">Регистрация</button>
+                </div>
+                <button id="authActionBtn" class="modal-btn primary">Войти</button>
+                <button id="closeAuthBtn" class="modal-btn secondary">Закрыть</button>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        let isLogin = true;
+        const nameField = modalDiv.querySelector('#authName');
+        const actionBtn = modalDiv.querySelector('#authActionBtn');
+        const loginTab = modalDiv.querySelector('#loginTabBtn');
+        const regTab = modalDiv.querySelector('#registerTabBtn');
+        loginTab.onclick = () => { isLogin = true; nameField.style.display = 'none'; actionBtn.innerText = 'Войти'; loginTab.style.background = 'var(--primary)'; regTab.style.background = ''; };
+        regTab.onclick = () => { isLogin = false; nameField.style.display = 'block'; actionBtn.innerText = 'Зарегистрироваться'; regTab.style.background = 'var(--primary)'; loginTab.style.background = ''; };
+        actionBtn.onclick = async () => {
+            const email = modalDiv.querySelector('#authEmail').value;
+            const pass = modalDiv.querySelector('#authPassword').value;
+            if (!email || !pass) { showToast('Заполните поля'); return; }
+            if (isLogin) {
+                await loginWithEmail(email, pass);
+            } else {
+                const name = modalDiv.querySelector('#authName').value;
+                if (!name) { showToast('Введите имя'); return; }
+                await registerWithEmail(email, pass, name);
+            }
+            modalDiv.remove();
+        };
+        modalDiv.querySelector('#closeAuthBtn').onclick = () => modalDiv.remove();
+    }
+
+    function showModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+    function hideModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+    // profile edit
+    document.getElementById('profileBtn').onclick = () => { if(currentUser) showModal('profileModal'); else showAuthModal(); };
+    document.getElementById('closeProfileModalBtn').onclick = () => hideModal('profileModal');
+    document.getElementById('logoutAppBtn').onclick = async () => { await logout(); hideModal('profileModal'); };
+    document.getElementById('editProfileBtn').onclick = () => {
+        document.getElementById('editNickname').value = currentUser.name || '';
+        document.getElementById('editAvatarImg').src = currentUser.prefs?.avatar || 'https://s10.iimage.su/s/24/th_gBLEtZ0xmRHICa1VWted3qYVAkGVWCX9Vkzypewdi.png';
+        showModal('editProfileModal');
+    };
+    document.getElementById('saveProfileEditBtn').onclick = async () => {
+        const newName = document.getElementById('editNickname').value;
+        let avatarUrl = currentUser.prefs?.avatar;
+        const avatarFileInput = document.getElementById('editAvatarInput');
+        if (avatarFileInput.files.length) {
+            const file = avatarFileInput.files[0];
+            const uploaded = await uploadToCloudinary(file);
+            if (uploaded) avatarUrl = uploaded;
+        }
+        await updateUserProfile(newName, avatarUrl);
+        hideModal('editProfileModal');
+        location.reload(); // refresh ui
+    };
+    document.getElementById('editAvatarImg').onclick = () => document.getElementById('editAvatarInput').click();
+    document.getElementById('cancelEditBtn').onclick = () => hideModal('editProfileModal');
+
+    // init
+    checkAuth();
+</script>
+</body>
+</html>
